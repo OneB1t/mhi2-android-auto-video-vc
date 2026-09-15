@@ -15,17 +15,20 @@ make hook
 (cd player && make)
 ```
 
-`make hook` builds `libgal_hook.so` through the QNX ARM toolchain in Docker.
-The root Makefile provides `all`, `hook`, `shell`, and `clean`; it does not
-create a release package. If deployment expects `dist/sdcard_hook`, assemble
-that package through the corresponding packaging workflow before invoking the
-remote deployment helper.
+`make hook` builds `libgal_hook.so` and `libdmdt_flush.so` through the QNX ARM
+toolchain in Docker. The root Makefile provides `all`, `hook`, `player`,
+`package`, `shell`, and `clean`. `make package` builds the hook and
+`player/stream-player` and assembles them, alongside the install/rollback/
+diagnostic scripts and a copy of `gal_dualscreen.conf.example`, into
+`dist/sdcard_hook` -- the layout `scripts/deploy_to_car.sh` expects. It does
+not supply companion JARs, which are not built by this repo.
 
 ## Expected artifacts
 
 | Artifact | Source | Role |
 |---|---|---|
 | `libgal_hook.so` | `make hook` | GAL preload hook. |
+| `libdmdt_flush.so` | `make hook` (`dmdt_flush/dmdt_flush.c`) | Interposes `_exit()` in `dmdt` so buffered stdout/stderr are flushed before exit. |
 | `player/stream-player` | `player/Makefile` | FFmpeg/OpenKODE cluster renderer. |
 | `player/build/ffmpeg-mini/` | `player/build_ffmpeg.sh` (auto-run by `player/Makefile`) | Static libavcodec/libavformat/libavutil for QNX ARMv7. |
 | `player/config.txt` | Repository | Player defaults and stream URL. |

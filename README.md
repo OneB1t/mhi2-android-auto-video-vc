@@ -145,13 +145,15 @@ needed, caching it under `player/build/`.
 
 ```sh
 docker pull registry.gitlab.com/andrewleech/mibsdk:latest
-make hook
-(cd player && make)
+make package
 ```
 
-This produces `libgal_hook.so` and `player/stream-player`. Verify that release
-artifacts target QNX ARM; a successful host build does not validate the GAL ABI,
-phone negotiation, DMDT route, or Cockpit output.
+This builds `libgal_hook.so`, `libdmdt_flush.so`, and `player/stream-player`,
+then assembles them with the install/rollback/diagnostic scripts and a copy
+of `gal_dualscreen.conf.example` into `dist/sdcard_hook/`, ready to copy to
+the SD card (companion JARs are not built by this repo). Verify that release
+artifacts target QNX ARM; a successful host build does not validate the GAL
+ABI, phone negotiation, DMDT route, or Cockpit output.
 
 ## Install and validate
 
@@ -159,8 +161,10 @@ phone negotiation, DMDT route, or Cockpit output.
 > `smartphone_integrator` has an approximately ten-entry `envs` limit. Exceeding
 > it can silently discard the entire environment array, including `LD_PRELOAD`.
 
-Prepare the expected SD-card package, including the hook, player, scripts,
-`libdmdt_flush.so`, and reviewed configuration. On the unit:
+Prepare the expected SD-card package with `make package` (see
+[Build](#build)), review `dist/sdcard_hook/gal_dualscreen.conf`, and copy the
+folder's contents to the SD card root -- or run
+`scripts/deploy_to_car.sh <MIB_IP>` to push it directly. On the unit:
 
 ```sh
 cd /fs/sdb0
